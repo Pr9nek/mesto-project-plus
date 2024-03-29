@@ -13,6 +13,7 @@ export const getUsers = async (req: Request, res: Response) => {
       .send({ message: "Ошибка на стороне сервера" });
   }
 };
+
 export const getUserById = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
@@ -34,7 +35,7 @@ export const getUserById = async (req: Request, res: Response) => {
     if (error instanceof MongooseError.CastError) {
       return res
         .status(constants.HTTP_STATUS_BAD_REQUEST)
-        .send({ message: "Не валидный идентификатор" });
+        .send({ message: "Невалидный идентификатор" });
     }
 
     return res
@@ -47,6 +48,7 @@ export const createUser = async (req: Request, res: Response) => {
   try {
     const newUser = new User(req.body);
     return res.status(constants.HTTP_STATUS_CREATED).send(await newUser.save());
+
   } catch (error) {
     if (error instanceof MongooseError.ValidationError) {
       return res
@@ -63,5 +65,77 @@ export const createUser = async (req: Request, res: Response) => {
     return res
       .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
       .send({ message: "Ошибка на сервера" });
+  }
+};
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    // const { userId } = req.params;
+    const { name, about } = req.body;
+    const user = await User.findByIdAndUpdate(req.user._id,
+      { name, about },
+      {
+        new: true,
+        runValidators: true,
+      }).orFail(() => {
+      const error = new Error("Пользователя с переданным ID нет в базе");
+      error.name = "NotFoundError";
+      return error;
+    });
+
+    return res.send(user);
+
+  } catch (error) {
+    if (error instanceof Error && error.name === "NotFoundError") {
+      return res
+        .status(constants.HTTP_STATUS_NOT_FOUND)
+        .send({ message: error.message });
+    }
+
+    if (error instanceof MongooseError.CastError) {
+      return res
+        .status(constants.HTTP_STATUS_BAD_REQUEST)
+        .send({ message: "Невалидный идентификатор" });
+    }
+
+    return res
+      .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .send({ message: "Ошибка на сервере" });
+  }
+};
+
+export const updateUserAvatar = async (req: Request, res: Response) => {
+  try {
+    // const { userId } = req.params;
+    const { avatar } = req.body;
+    const user = await User.findByIdAndUpdate(req.user._id,
+      avatar,
+      {
+        new: true,
+        runValidators: true,
+      }).orFail(() => {
+      const error = new Error("Пользователя с переданным ID нет в базе");
+      error.name = "NotFoundError";
+      return error;
+    });
+
+    return res.send(user);
+
+  } catch (error) {
+    if (error instanceof Error && error.name === "NotFoundError") {
+      return res
+        .status(constants.HTTP_STATUS_NOT_FOUND)
+        .send({ message: error.message });
+    }
+
+    if (error instanceof MongooseError.CastError) {
+      return res
+        .status(constants.HTTP_STATUS_BAD_REQUEST)
+        .send({ message: "Невалидный идентификатор" });
+    }
+
+    return res
+      .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .send({ message: "Ошибка на сервере" });
   }
 };
