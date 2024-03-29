@@ -1,12 +1,12 @@
-import { log } from "console";
-import "dotenv/config";
+import { log } from 'console';
+import 'dotenv/config';
 import express from 'express';
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import userRouter from "./routes/users";
-import cardRouter from "./routes/cards";
+import userRouter from './routes/users';
+import cardRouter from './routes/cards';
 
-const { PORT, MONGO_URL = "" } = process.env;
+const { PORT, MONGO_URL = '' } = process.env;
 const app = express();
 
 app.use(express.json()); // для собирания JSON-формата
@@ -17,7 +17,7 @@ mongoose.connect(MONGO_URL);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   req.user = {
-    _id: "660660fa84f0a2fb04b07544",
+    _id: '660660fa84f0a2fb04b07544',
   };
   next();
 });

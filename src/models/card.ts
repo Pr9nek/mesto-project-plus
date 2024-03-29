@@ -1,4 +1,3 @@
-import { model, Schema } from 'mongoose';
 import mongoose from 'mongoose';
 import validator from 'validator';
 
@@ -10,12 +9,12 @@ export interface ICard {
   createdAt: Date;
 }
 
-const cardSchema = new Schema<ICard>({
+const cardSchema = new mongoose.Schema<ICard>({
   name: {
     type: String,
     minlength: 2,
     maxlength: 30,
-    required: [true, 'Поле name является обязательным']
+    required: [true, 'Поле name является обязательным'],
   },
   link: {
     type: String,
@@ -23,14 +22,14 @@ const cardSchema = new Schema<ICard>({
     validate: {
       validator: (v: string) => validator.isURL(v),
       message: 'Некорректный формат ссылки',
-    }
+    },
   },
   owner: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
   likes: [{
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
     default: [],
   }],
@@ -41,4 +40,4 @@ const cardSchema = new Schema<ICard>({
 
 });
 
-export default model<ICard>("card", cardSchema);
+export default mongoose.model<ICard>('card', cardSchema);

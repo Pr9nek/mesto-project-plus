@@ -12,13 +12,13 @@ const userSchema = new Schema<IUser>({
     type: String,
     minlength: 2,
     maxlength: 30,
-    required: [true, 'Поле name является обязательным']
+    required: [true, 'Поле name является обязательным'],
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 200,
-    required: [true, 'Поле about является обязательным']
+    required: [true, 'Поле about является обязательным'],
   },
   avatar: {
     type: String,
@@ -27,9 +27,8 @@ const userSchema = new Schema<IUser>({
     validate: {
       validator: (v: string) => validator.isURL(v),
       message: 'Некорректный формат ссылки',
-    }
-  }
-
+    },
+  },
 });
 
-export default model<IUser>("user", userSchema);
+export default model<IUser>('user', userSchema);
