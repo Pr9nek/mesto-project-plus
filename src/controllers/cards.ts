@@ -3,6 +3,7 @@ import { constants } from 'http2';
 import { Error as MongooseError } from 'mongoose';
 import Card from '../models/card';
 import ForbiddenError from '../errors/forbidden_error';
+import { DATA_NOT_FOUND } from '../constants';
 
 export const getCards = async (req: Request, res: Response) => {
   try {
@@ -31,7 +32,7 @@ export const delCardById = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof Error && error.name === 'NotFoundError') {
       return res
-        .status(constants.HTTP_STATUS_NOT_FOUND)
+        .status(DATA_NOT_FOUND)
         .send({ message: error.message });
     }
 
@@ -88,7 +89,7 @@ export const likeCard = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof Error && error.name === 'NotFoundError') {
       return res
-        .status(constants.HTTP_STATUS_NOT_FOUND)
+        .status(DATA_NOT_FOUND)
         .send({ message: error.message });
     }
 
@@ -121,7 +122,7 @@ export const dislikeCard = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof Error && error.name === 'NotFoundError') {
       return res
-        .status(constants.HTTP_STATUS_NOT_FOUND)
+        .status(DATA_NOT_FOUND)
         .send({ message: error.message });
     }
 
