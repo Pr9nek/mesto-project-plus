@@ -3,8 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import userRouter from './routes/users';
-import cardRouter from './routes/cards';
+import router from './routes/index';
 
 const { PORT, MONGO_URL = '' } = process.env;
 const app = express();
@@ -22,12 +21,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
-
+app.use(router);
 
 app.listen(PORT, () => {
-
-  // Если всё работает, консоль покажет, какой порт приложение слушает
-  console.log(`App listening on port ${PORT}`)
-})
+  console.log(`App listening on port ${PORT}`);
+});
