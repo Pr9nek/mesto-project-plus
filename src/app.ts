@@ -4,6 +4,7 @@ import express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import router from './routes/index';
+import { createUser, login } from './controllers/users';
 
 const { PORT, MONGO_URL = '' } = process.env;
 const app = express();
@@ -13,6 +14,9 @@ app.use(express.urlencoded({ extended: true })); // для приёма веб-�
 
 mongoose.set('strictQuery', true);
 mongoose.connect(MONGO_URL);
+
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   req.user = {

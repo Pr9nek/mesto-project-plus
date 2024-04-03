@@ -1,8 +1,12 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcrypt';
+// import jwt from 'jsonwebtoken';
 import { constants } from 'http2';
 import { Error as MongooseError } from 'mongoose';
 import User from '../models/user';
-import { VALIDATION_ERROR, DATA_NOT_FOUND } from '../constants';
+import { VALIDATION_ERROR, DATA_NOT_FOUND, SOLT_ROUND } from '../constants';
+import AuthenticationError from '../errors/authentication_error';
+import generateToken from '../utils/jwt';
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
@@ -43,7 +47,21 @@ export const getUserById = async (req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const newUser = new User(req.body);
+    const {
+      name,
+      about,
+      avatar,
+      email,
+      password,
+    } = req.body;
+    const hash = await bcrypt.hash(password, SOLT_ROUND);
+    const newUser = new User({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    });
     return res.status(constants.HTTP_STATUS_CREATED).send(await newUser.save());
   } catch (error) {
     if (error instanceof MongooseError.ValidationError) {
@@ -128,6 +146,31 @@ export const updateUserAvatar = async (req: Request, res: Response) => {
         .send({ message: 'Некорректные данные аватара профиля' });
     }
     return res
+      .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .send({ message: 'Ошибка на сервере' });
+  }
+};
+
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+  const { email, password } = req.body || {};
+  try {
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      next(new AuthenticationError('Неправильные почта или пароль'));
+      return;
+    }
+    const matched = await bcrypt.compare(password, user!.password);
+    if (!matched) {
+      next(new AuthenticationError('Неправильные почта или пароль'));
+      return;
+    }
+    const token = generateToken({ _id: user?._id });
+
+    res
+      .status(200)
+      .send({ data: { _id: user?._id }, token });
+  } catch (error) {
+    res
       .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
       .send({ message: 'Ошибка на сервере' });
   }
