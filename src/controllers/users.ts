@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
-// import jwt from 'jsonwebtoken';
 import { constants } from 'http2';
 import { Error as MongooseError } from 'mongoose';
 import User from '../models/user';

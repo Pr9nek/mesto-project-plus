@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import router from './routes/index';
 import { createUser, login } from './controllers/users';
+import auth from './middlewares/auth';
 
 const { PORT, MONGO_URL = '' } = process.env;
 const app = express();
@@ -18,13 +19,7 @@ mongoose.connect(MONGO_URL);
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: '660660fa84f0a2fb04b07544',
-  };
-  next();
-});
-
+app.use(auth);
 app.use(router);
 
 app.listen(PORT, () => {

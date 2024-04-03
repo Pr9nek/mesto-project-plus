@@ -1,6 +1,6 @@
 import { UNAUTHORIZED_ERROR } from '../constants';
 
-class AuthenticationError extends Error {
+class UnauthorizedError extends Error {
   statusCode: number;
 
   constructor(message: string) {
@@ -9,4 +9,4 @@ class AuthenticationError extends Error {
   }
 }
 
-export default AuthenticationError;
+export default UnauthorizedError;
