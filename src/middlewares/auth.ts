@@ -10,14 +10,14 @@ interface UserPayload {
 export default (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    throw new UnauthorizedError('Пользователь не авторизован');
+    throw new UnauthorizedError('Отсутствует авторизация');
   }
   const token = authorization.replace('Bearer ', '');
   let payload;
   try {
     payload = jwt.verify(token, 'dev_secret') as UserPayload;
   } catch (err) {
-    throw new UnauthorizedError('Пользователь не авторизован');
+    throw new UnauthorizedError('Отсутствует авторизация');
   }
   req.user = payload;
   return next();

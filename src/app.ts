@@ -1,11 +1,12 @@
-import { log } from 'console';
 import 'dotenv/config';
+import { errors } from 'celebrate';
 import express from 'express';
-import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
+import { requestLogger, errorLogger } from './middlewares/logger';
 import router from './routes/index';
 import { createUser, login } from './controllers/users';
 import auth from './middlewares/auth';
+import errorHandler from './middlewares/error';
 
 const { PORT, MONGO_URL = '' } = process.env;
 const app = express();
@@ -16,11 +17,18 @@ app.use(express.urlencoded({ extended: true })); // для приёма веб-�
 mongoose.set('strictQuery', true);
 mongoose.connect(MONGO_URL);
 
+app.use(requestLogger); // подключаем логер запросов
+
 app.post('/signin', login);
 app.post('/signup', createUser);
 
 app.use(auth);
 app.use(router);
+
+app.use(errorLogger); // подключаем логер ошибок
+app.use(errors()); // обработчик ошибок celebrate
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
