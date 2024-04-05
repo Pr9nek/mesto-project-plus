@@ -136,7 +136,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
     const token = generateToken({ _id: user?._id });
 
-    res
+    return res
       .status(200)
       .send({ data: { _id: user?._id }, token });
   } catch (error) {

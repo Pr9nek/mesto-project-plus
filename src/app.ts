@@ -7,6 +7,7 @@ import router from './routes/index';
 import { createUser, login } from './controllers/users';
 import auth from './middlewares/auth';
 import errorHandler from './middlewares/error';
+import { validateUserBody, validateAuthLogin } from './validators';
 
 const { PORT, MONGO_URL = '' } = process.env;
 const app = express();
@@ -19,8 +20,8 @@ mongoose.connect(MONGO_URL);
 
 app.use(requestLogger); // подключаем логер запросов
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', validateAuthLogin, login);
+app.post('/signup', validateUserBody, createUser);
 
 app.use(auth);
 app.use(router);

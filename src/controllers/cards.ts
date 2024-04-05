@@ -86,7 +86,7 @@ export const dislikeCard = async (req: Request, res: Response, next: NextFunctio
     return res.send(card);
   } catch (error) {
     if (error instanceof MongooseError.CastError) {
-      return next(new BadRequestError('Невалидный идентификатор'))
+      return next(new BadRequestError('Невалидный идентификатор'));
     }
     return next(error);
   }

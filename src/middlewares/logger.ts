@@ -2,13 +2,13 @@ import winston from 'winston';
 import expressWinston from 'express-winston';
 import 'winston-daily-rotate-file';
 
-const transport = new winston.transports.DailyRotateFile({
-  filename: 'error-%DATE%.log',
-  datePattern: 'YYYY-MM-DD-HH',
-  maxSize: '20m',
-  maxFiles: '14d',
-  zippedArchive: true,
-});
+// const transport = new winston.transports.DailyRotateFile({
+//   filename: 'error-%DATE%.log',
+//   datePattern: 'YYYY-MM-DD-HH',
+//   maxSize: '20m',
+//   maxFiles: '14d',
+//   zippedArchive: true,
+// });
 
 export const requestLogger = expressWinston.logger({
   transports: [
