@@ -26,9 +26,6 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
     });
     return res.send(user);
   } catch (error) {
-    if (error instanceof MongooseError.CastError) {
-      return next(new BadRequestError('Пользователь по указанному _id не найден'));
-    }
     return next(error);
   }
 };

@@ -5,7 +5,6 @@ import Card from '../models/card';
 import ForbiddenError from '../errors/forbidden_error';
 import NotFoundError from '../errors/notfound_error';
 import BadRequestError from '../errors/badrequest_error';
-import ConflictError from '../errors/conflict_error';
 
 export const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -43,10 +42,6 @@ export const createCard = async (req: Request, res: Response, next: NextFunction
   } catch (error) {
     if (error instanceof MongooseError.ValidationError) {
       return next(new BadRequestError('Некорректные данные карты'));
-    }
-
-    if (error instanceof Error && error.message.startsWith('E11000')) {
-      return next(new ConflictError('Конфликт создания сущности в БД'));
     }
     return next(error);
   }
