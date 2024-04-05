@@ -1,28 +1,26 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { constants } from 'http2';
 import { Error as MongooseError } from 'mongoose';
 import Card from '../models/card';
 import ForbiddenError from '../errors/forbidden_error';
-import { DATA_NOT_FOUND } from '../constants';
+import NotFoundError from '../errors/notfound_error';
+import BadRequestError from '../errors/badrequest_error';
+import ConflictError from '../errors/conflict_error';
 
-export const getCards = async (req: Request, res: Response) => {
+export const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cards = await Card.find({});
     return res.send(cards);
   } catch (error) {
-    return res
-      .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
-export const delCardById = async (req: Request, res: Response) => {
+export const delCardById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { cardId } = req.params;
     const card = await Card.findById(cardId).orFail(() => {
-      const error = new Error('Карточки с переданным ID нет в базе');
-      error.name = 'NotFoundError';
-      return error;
+      throw new NotFoundError('Карточки с переданным ID нет в базе');
     });
     if (req.user?._id !== card?.owner.toString()) {
       throw new ForbiddenError('Можно удалять только свои карточки');
@@ -30,49 +28,31 @@ export const delCardById = async (req: Request, res: Response) => {
     await card.delete();
     return res.send({ message: 'Карточка удалена' });
   } catch (error) {
-    if (error instanceof Error && error.name === 'NotFoundError') {
-      return res
-        .status(DATA_NOT_FOUND)
-        .send({ message: error.message });
-    }
-
     if (error instanceof MongooseError.CastError) {
-      return res
-        .status(constants.HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Невалидный идентификатор' });
+      return next(new BadRequestError('Невалидный идентификатор'));
     }
-
-    return res
-      .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на сервера' });
+    return next(error);
   }
 };
 
-export const createCard = async (req: Request, res: Response) => {
+export const createCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, link } = req.body;
     const newCard = new Card({ name, link, owner: req.user?._id });
     return res.status(constants.HTTP_STATUS_CREATED).send(await newCard.save());
   } catch (error) {
     if (error instanceof MongooseError.ValidationError) {
-      return res
-        .status(constants.HTTP_STATUS_BAD_REQUEST)
-        .send({ message: error.message });
+      return next(new BadRequestError('Некорректные данные карты'));
     }
 
     if (error instanceof Error && error.message.startsWith('E11000')) {
-      return res
-        .status(constants.HTTP_STATUS_CONFLICT)
-        .send({ message: 'Конфликт создания сущности в БД' });
+      return next(new ConflictError('Конфликт создания сущности в БД'));
     }
-
-    return res
-      .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на сервера' });
+    return next(error);
   }
 };
 
-export const likeCard = async (req: Request, res: Response) => {
+export const likeCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { cardId } = req.params;
     const card = await Card.findByIdAndUpdate(
@@ -81,31 +61,18 @@ export const likeCard = async (req: Request, res: Response) => {
       { new: true },
     )
       .orFail(() => {
-        const error = new Error('Карточки с переданным ID нет в базе');
-        error.name = 'NotFoundError';
-        return error;
+        throw new NotFoundError('Карточки с переданным ID нет в базе');
       });
     return res.send(card);
   } catch (error) {
-    if (error instanceof Error && error.name === 'NotFoundError') {
-      return res
-        .status(DATA_NOT_FOUND)
-        .send({ message: error.message });
-    }
-
     if (error instanceof MongooseError.CastError) {
-      return res
-        .status(constants.HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Невалидный идентификатор' });
+      return next(new BadRequestError('Невалидный идентификатор'));
     }
-
-    return res
-      .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на сервера' });
+    return next(error);
   }
 };
 
-export const dislikeCard = async (req: Request, res: Response) => {
+export const dislikeCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { cardId } = req.params;
     const card = await Card.findByIdAndUpdate(
@@ -114,26 +81,13 @@ export const dislikeCard = async (req: Request, res: Response) => {
       { new: true },
     )
       .orFail(() => {
-        const error = new Error('Карточки с переданным ID нет в базе');
-        error.name = 'NotFoundError';
-        return error;
+        throw new NotFoundError('Карточки с переданным ID нет в базе');
       });
     return res.send(card);
   } catch (error) {
-    if (error instanceof Error && error.name === 'NotFoundError') {
-      return res
-        .status(DATA_NOT_FOUND)
-        .send({ message: error.message });
-    }
-
     if (error instanceof MongooseError.CastError) {
-      return res
-        .status(constants.HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Невалидный идентификатор' });
+      return next(new BadRequestError('Невалидный идентификатор'));
     }
-
-    return res
-      .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на сервера' });
+    return next(error);
   }
 };
